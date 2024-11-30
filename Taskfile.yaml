@@ -1,0 +1,10 @@
+version: "3"
+
+
+tasks:
+  run:
+    cmds:
+      - go run ./cmd/ubiquitous-octo-fiesta/main.go --config=./config/local.yaml
+  docker_storage:
+    cmds:
+      - docker run --name medods -p 5432:5432 -e POSTGRES_USER=medods_admin -e POSTGRES_PASSWORD=medods_password -e POSTGRES_DB=medods -d postgres

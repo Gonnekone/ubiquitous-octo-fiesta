@@ -3,13 +3,13 @@ env: local # dev, prod
 storage:
   host: localhost
   port: 5432
-  database: medods
-  user: medods_admin
-  password: medods_password
+  database: some_db
+  user: some_user
+  password: some_password
 
 http_server:
-  address: localhost:8082
+  address: localhost:8080
   timeout: 4s
   idle_timeout: 60s
 
-secret_key: medods
+secret_key: some_key

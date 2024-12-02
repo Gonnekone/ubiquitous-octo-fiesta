@@ -2,6 +2,7 @@ package tokens
 
 import (
 	"context"
+	"errors"
 	resp "github.com/Gonnekone/ubiquitous-octo-fiesta/internal/lib/api/response"
 	"github.com/Gonnekone/ubiquitous-octo-fiesta/internal/lib/jwt"
 	"github.com/Gonnekone/ubiquitous-octo-fiesta/internal/lib/logger/sl"
@@ -10,9 +11,11 @@ import (
 	"golang.org/x/crypto/bcrypt"
 	"log/slog"
 	"net/http"
+	"strings"
 	"time"
 )
 
+//go:generate go run github.com/vektra/mockery/v2@v2.49.1 --name=RefreshTokenSaveDeleter
 type RefreshTokenSaveDeleter interface {
 	SaveRefreshToken(ctx context.Context, guid string, refreshToken string) error
 	DeleteRefreshToken(ctx context.Context, guid string) error
@@ -28,7 +31,16 @@ func New(log *slog.Logger, refreshTokenSaveDeleter RefreshTokenSaveDeleter, jwtS
 		)
 
 		guid := r.URL.Query().Get("guid")
-		ip := r.RemoteAddr
+		if guid == "" {
+			log.Error("invalid request", sl.Err(errors.New("guid is empty")))
+
+			render.Status(r, http.StatusBadRequest)
+			render.JSON(w, r, resp.Error("invalid request"))
+
+			return
+		}
+
+		ip := strings.Split(r.RemoteAddr, ":")[0]
 
 		log.Debug("got request", slog.String("guid", guid), slog.String("ip", ip))
 
@@ -36,7 +48,7 @@ func New(log *slog.Logger, refreshTokenSaveDeleter RefreshTokenSaveDeleter, jwtS
 		if err != nil {
 			log.Error("failed to generate tokens", sl.Err(err))
 
-			w.WriteHeader(http.StatusBadRequest)
+			render.Status(r, http.StatusBadRequest)
 			render.JSON(w, r, resp.Error("invalid request"))
 
 			return
@@ -51,7 +63,7 @@ func New(log *slog.Logger, refreshTokenSaveDeleter RefreshTokenSaveDeleter, jwtS
 		if err != nil {
 			log.Error("failed to hash refresh token", sl.Err(err))
 
-			w.WriteHeader(http.StatusBadRequest)
+			render.Status(r, http.StatusBadRequest)
 			render.JSON(w, r, resp.Error("invalid request"))
 
 			return
@@ -60,7 +72,7 @@ func New(log *slog.Logger, refreshTokenSaveDeleter RefreshTokenSaveDeleter, jwtS
 		if err := refreshTokenSaveDeleter.DeleteRefreshToken(r.Context(), guid); err != nil {
 			log.Error("failed to delete refresh token hash", sl.Err(err))
 
-			w.WriteHeader(http.StatusBadRequest)
+			render.Status(r, http.StatusBadRequest)
 			render.JSON(w, r, resp.Error("invalid request"))
 
 			return
@@ -69,7 +81,7 @@ func New(log *slog.Logger, refreshTokenSaveDeleter RefreshTokenSaveDeleter, jwtS
 		if err := refreshTokenSaveDeleter.SaveRefreshToken(r.Context(), guid, string(hash)); err != nil {
 			log.Error("failed to save refresh token hash", sl.Err(err))
 
-			w.WriteHeader(http.StatusBadRequest)
+			render.Status(r, http.StatusBadRequest)
 			render.JSON(w, r, resp.Error("invalid request"))
 
 			return

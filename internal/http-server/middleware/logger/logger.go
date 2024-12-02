@@ -3,6 +3,7 @@ package logger
 import (
 	"log/slog"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/go-chi/chi/v5/middleware"
@@ -20,10 +21,9 @@ func New(log *slog.Logger) func(next http.Handler) http.Handler {
 			entry := log.With(
 				slog.String("method", r.Method),
 				slog.String("path", r.URL.Path),
-				slog.String("remote_addr", r.RemoteAddr),
+				slog.String("ip", strings.Split(r.RemoteAddr, ":")[0]),
 				slog.String("user_agent", r.UserAgent()),
 				slog.String("request_id", middleware.GetReqID(r.Context())),
-				slog.String("ip", r.RemoteAddr),
 			)
 			ww := middleware.NewWrapResponseWriter(w, r.ProtoMajor)
 

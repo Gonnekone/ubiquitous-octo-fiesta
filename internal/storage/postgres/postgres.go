@@ -63,7 +63,7 @@ func (s *Storage) DeleteRefreshToken(ctx context.Context, guid string) error {
 	return err
 }
 
-func (s *Storage) TokenExists(ctx context.Context, guid string) (string, error) {
+func (s *Storage) GetRefreshTokenHash(ctx context.Context, guid string) (string, error) {
 	rows, err := s.db.Query(ctx, "SELECT refresh_token FROM refresh_tokens WHERE id = $1", guid)
 	defer rows.Close()
 	if err != nil {

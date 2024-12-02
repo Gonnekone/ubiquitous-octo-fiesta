@@ -95,9 +95,9 @@ func setupLogger(env string) *slog.Logger {
 	switch env {
 	case envLocal:
 		log = setupPrettySlog()
-	case envDev: // not used
+	case envDev:
 		log = slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelDebug}))
-	case envProd: // not used
+	case envProd:
 		log = slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelInfo}))
 	}
 

@@ -9,6 +9,11 @@ import (
 	"time"
 )
 
+var (
+	ErrInvalidAccessToken  = errors.New("invalid access token")
+	ErrInvalidRefreshToken = errors.New("invalid refresh token")
+)
+
 type Tokens struct {
 	AccessToken  string `json:"access_token"`
 	RefreshToken string `json:"refresh_token"`
@@ -66,7 +71,7 @@ func (s *Service) ValidateAccessToken(accessToken string) (string, string, error
 
 	claims, ok := token.Claims.(jwt.MapClaims)
 	if !ok || claims["type"] != "access" {
-		return "", "", errors.New("invalid token")
+		return "", "", ErrInvalidAccessToken
 	}
 
 	return claims["ip"].(string), claims["guid"].(string), nil
@@ -80,7 +85,7 @@ func (s *Service) ValidateRefreshToken(refreshToken string, accessToken string, 
 	finalRefreshToken := base64.URLEncoding.EncodeToString(hash[:])
 
 	if refreshToken != finalRefreshToken {
-		return errors.New("invalid refresh token")
+		return ErrInvalidRefreshToken
 	}
 
 	return nil

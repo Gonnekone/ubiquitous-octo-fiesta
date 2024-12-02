@@ -11,4 +11,4 @@ COPY --from=builder /app/main .
 COPY --from=builder /app/config ./config
 EXPOSE 8082
 RUN /bin/sh
-CMD ["./main", "--config=./config/local.yaml"]
+CMD ["./main"]

@@ -6,6 +6,8 @@ type Response struct {
 }
 
 const (
+	InvalidRequest = "invalid request"
+
 	StatusOK    = "OK"
 	StatusError = "Error"
 )

@@ -15,6 +15,10 @@ import (
 	"time"
 )
 
+var (
+	ErrEmptyGUID = errors.New("guid is empty")
+)
+
 //go:generate go run github.com/vektra/mockery/v2@v2.49.1 --name=RefreshTokenSaveDeleter
 type RefreshTokenSaveDeleter interface {
 	SaveRefreshToken(ctx context.Context, guid string, refreshToken string) error
@@ -32,10 +36,10 @@ func New(log *slog.Logger, refreshTokenSaveDeleter RefreshTokenSaveDeleter, jwtS
 
 		guid := r.URL.Query().Get("guid")
 		if guid == "" {
-			log.Error("invalid request", sl.Err(errors.New("guid is empty")))
+			log.Error("invalid request", sl.Err(ErrEmptyGUID))
 
 			render.Status(r, http.StatusBadRequest)
-			render.JSON(w, r, resp.Error("invalid request"))
+			render.JSON(w, r, resp.Error(resp.InvalidRequest))
 
 			return
 		}
@@ -49,7 +53,7 @@ func New(log *slog.Logger, refreshTokenSaveDeleter RefreshTokenSaveDeleter, jwtS
 			log.Error("failed to generate tokens", sl.Err(err))
 
 			render.Status(r, http.StatusBadRequest)
-			render.JSON(w, r, resp.Error("invalid request"))
+			render.JSON(w, r, resp.Error(resp.InvalidRequest))
 
 			return
 		}
@@ -64,7 +68,7 @@ func New(log *slog.Logger, refreshTokenSaveDeleter RefreshTokenSaveDeleter, jwtS
 			log.Error("failed to hash refresh token", sl.Err(err))
 
 			render.Status(r, http.StatusBadRequest)
-			render.JSON(w, r, resp.Error("invalid request"))
+			render.JSON(w, r, resp.Error(resp.InvalidRequest))
 
 			return
 		}
@@ -73,7 +77,7 @@ func New(log *slog.Logger, refreshTokenSaveDeleter RefreshTokenSaveDeleter, jwtS
 			log.Error("failed to delete refresh token hash", sl.Err(err))
 
 			render.Status(r, http.StatusBadRequest)
-			render.JSON(w, r, resp.Error("invalid request"))
+			render.JSON(w, r, resp.Error(resp.InvalidRequest))
 
 			return
 		}
@@ -82,7 +86,7 @@ func New(log *slog.Logger, refreshTokenSaveDeleter RefreshTokenSaveDeleter, jwtS
 			log.Error("failed to save refresh token hash", sl.Err(err))
 
 			render.Status(r, http.StatusBadRequest)
-			render.JSON(w, r, resp.Error("invalid request"))
+			render.JSON(w, r, resp.Error(resp.InvalidRequest))
 
 			return
 		}

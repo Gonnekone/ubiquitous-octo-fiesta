@@ -8,3 +8,10 @@ tasks:
   stop:
     cmds:
       - docker compose down
+  run_unit_tests:
+    cmds:
+      - go test -v ./internal/http-server/handlers/refresh/refresh_test.go
+      - go test -v ./internal/http-server/handlers/tokens/tokens_test.go
+  run_e2e_tests:
+    cmds:
+      - go test -v ./tests/...

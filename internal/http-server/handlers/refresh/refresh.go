@@ -18,6 +18,11 @@ import (
 
 const emailToSend = "opacha2018@yandex.ru"
 
+var (
+	ErrEmptyAccessToken  = errors.New("access token is empty")
+	ErrEmptyRefreshToken = errors.New("access token is empty")
+)
+
 //go:generate go run github.com/vektra/mockery/v2@v2.49.1 --name=RefreshTokenProvider
 type RefreshTokenProvider interface {
 	SaveRefreshToken(ctx context.Context, guid string, refreshToken string) error
@@ -52,19 +57,19 @@ func New(log *slog.Logger, refreshTokenProvider RefreshTokenProvider, jwtService
 		}
 
 		if req.AccessToken == "" {
-			log.Error("invalid request", sl.Err(errors.New("access token is empty")))
+			log.Error("invalid request", sl.Err(ErrEmptyAccessToken))
 
 			render.Status(r, http.StatusBadRequest)
-			render.JSON(w, r, resp.Error("invalid request"))
+			render.JSON(w, r, resp.Error(resp.InvalidRequest))
 
 			return
 		}
 
 		if req.RefreshToken == "" {
-			log.Error("invalid request", sl.Err(errors.New("refresh token is empty")))
+			log.Error("invalid request", sl.Err(ErrEmptyRefreshToken))
 
 			render.Status(r, http.StatusBadRequest)
-			render.JSON(w, r, resp.Error("invalid request"))
+			render.JSON(w, r, resp.Error(resp.InvalidRequest))
 
 			return
 		}
@@ -82,7 +87,7 @@ func New(log *slog.Logger, refreshTokenProvider RefreshTokenProvider, jwtService
 			log.Error("failed to validate access token", sl.Err(err))
 
 			render.Status(r, http.StatusBadRequest)
-			render.JSON(w, r, resp.Error("invalid request"))
+			render.JSON(w, r, resp.Error(resp.InvalidRequest))
 
 			return
 		}
@@ -108,7 +113,7 @@ func New(log *slog.Logger, refreshTokenProvider RefreshTokenProvider, jwtService
 			log.Error("failed to get refresh token hash", sl.Err(err))
 
 			render.Status(r, http.StatusBadRequest)
-			render.JSON(w, r, resp.Error("invalid request"))
+			render.JSON(w, r, resp.Error(resp.InvalidRequest))
 
 			return
 		}
@@ -117,7 +122,7 @@ func New(log *slog.Logger, refreshTokenProvider RefreshTokenProvider, jwtService
 			log.Error("refresh token does not exist", sl.Err(err))
 
 			render.Status(r, http.StatusBadRequest)
-			render.JSON(w, r, resp.Error("invalid request"))
+			render.JSON(w, r, resp.Error(resp.InvalidRequest))
 
 			return
 		}
@@ -127,7 +132,7 @@ func New(log *slog.Logger, refreshTokenProvider RefreshTokenProvider, jwtService
 			log.Error("failed to validate refresh token", sl.Err(err))
 
 			render.Status(r, http.StatusBadRequest)
-			render.JSON(w, r, resp.Error("invalid request"))
+			render.JSON(w, r, resp.Error(resp.InvalidRequest))
 
 			return
 		}
@@ -136,7 +141,7 @@ func New(log *slog.Logger, refreshTokenProvider RefreshTokenProvider, jwtService
 			log.Error("failed to delete refresh token hash", sl.Err(err))
 
 			render.Status(r, http.StatusBadRequest)
-			render.JSON(w, r, resp.Error("invalid request"))
+			render.JSON(w, r, resp.Error(resp.InvalidRequest))
 
 			return
 		}
@@ -146,7 +151,7 @@ func New(log *slog.Logger, refreshTokenProvider RefreshTokenProvider, jwtService
 			log.Error("failed to generate tokens", sl.Err(err))
 
 			render.Status(r, http.StatusBadRequest)
-			render.JSON(w, r, resp.Error("invalid request"))
+			render.JSON(w, r, resp.Error(resp.InvalidRequest))
 
 			return
 		}
@@ -156,7 +161,7 @@ func New(log *slog.Logger, refreshTokenProvider RefreshTokenProvider, jwtService
 			log.Error("failed to hash refresh token", sl.Err(err))
 
 			render.Status(r, http.StatusBadRequest)
-			render.JSON(w, r, resp.Error("invalid request"))
+			render.JSON(w, r, resp.Error(resp.InvalidRequest))
 
 			return
 		}
@@ -165,7 +170,7 @@ func New(log *slog.Logger, refreshTokenProvider RefreshTokenProvider, jwtService
 			log.Error("failed to save refresh token hash", sl.Err(err))
 
 			render.Status(r, http.StatusBadRequest)
-			render.JSON(w, r, resp.Error("invalid request"))
+			render.JSON(w, r, resp.Error(resp.InvalidRequest))
 
 			return
 		}

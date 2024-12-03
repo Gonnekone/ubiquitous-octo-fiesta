@@ -19,17 +19,17 @@ type Tokens struct {
 	RefreshToken string `json:"refresh_token"`
 }
 
-type Service struct {
+type JwtService struct {
 	secret []byte
 }
 
-func New(secret string) *Service {
-	return &Service{
+func New(secret string) *JwtService {
+	return &JwtService{
 		secret: []byte(secret),
 	}
 }
 
-func (s *Service) GenerateTokenPair(guid string, ip string, duration time.Duration) (*Tokens, error) {
+func (s *JwtService) GenerateTokenPair(guid string, ip string, duration time.Duration) (*Tokens, error) {
 	var err error
 	tokens := &Tokens{}
 
@@ -56,7 +56,7 @@ func (s *Service) GenerateTokenPair(guid string, ip string, duration time.Durati
 	return tokens, nil
 }
 
-func (s *Service) ValidateAccessToken(accessToken string) (string, string, error) {
+func (s *JwtService) ValidateAccessToken(accessToken string) (string, string, error) {
 	token, err := jwt.Parse(accessToken, func(token *jwt.Token) (interface{}, error) {
 		_, ok := token.Method.(*jwt.SigningMethodHMAC)
 		if !ok {
@@ -77,7 +77,7 @@ func (s *Service) ValidateAccessToken(accessToken string) (string, string, error
 	return claims["ip"].(string), claims["guid"].(string), nil
 }
 
-func (s *Service) ValidateRefreshToken(refreshToken string, accessToken string, ip string) error {
+func (s *JwtService) ValidateRefreshToken(refreshToken string, accessToken string, ip string) error {
 	expectedRefreshToken := "refresh_" + accessToken + "_" + ip
 
 	hash := sha256.Sum256([]byte(expectedRefreshToken))

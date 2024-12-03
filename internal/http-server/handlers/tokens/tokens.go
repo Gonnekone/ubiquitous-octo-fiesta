@@ -25,7 +25,7 @@ type RefreshTokenSaveDeleter interface {
 	DeleteRefreshToken(ctx context.Context, guid string) error
 }
 
-func New(log *slog.Logger, refreshTokenSaveDeleter RefreshTokenSaveDeleter, jwtService *jwt.Service) http.HandlerFunc {
+func New(log *slog.Logger, refreshTokenSaveDeleter RefreshTokenSaveDeleter, jwtService *jwt.JwtService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		const op = "handlers.tokens.New"
 

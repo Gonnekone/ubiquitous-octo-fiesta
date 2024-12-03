@@ -20,7 +20,7 @@ const emailToSend = "opacha2018@yandex.ru"
 
 var (
 	ErrEmptyAccessToken  = errors.New("access token is empty")
-	ErrEmptyRefreshToken = errors.New("access token is empty")
+	ErrEmptyRefreshToken = errors.New("access refresh is empty")
 )
 
 //go:generate go run github.com/vektra/mockery/v2@v2.49.1 --name=RefreshTokenProvider
@@ -35,7 +35,7 @@ type Request struct {
 	RefreshToken string `json:"refresh_token"`
 }
 
-func New(log *slog.Logger, refreshTokenProvider RefreshTokenProvider, jwtService *jwt.Service) http.HandlerFunc {
+func New(log *slog.Logger, refreshTokenProvider RefreshTokenProvider, jwtService *jwt.JwtService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		const op = "handlers.refresh.New"
 
@@ -96,6 +96,8 @@ func New(log *slog.Logger, refreshTokenProvider RefreshTokenProvider, jwtService
 
 		if accessIp != ip {
 			log.Debug("ip changed, sending email", slog.String("access_ip", accessIp), slog.String("ip", ip))
+
+			// получаем почту из бд
 
 			var err error
 
